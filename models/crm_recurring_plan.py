@@ -14,7 +14,8 @@ class RecurringPlan(models.Model):
     # Functions
 
 
-
+    def _default_date_availability(self):
+        return fields.Date.context_today(self) + relativedelta(months=3)
 
 
     name = fields.Char(required = True)
@@ -35,6 +36,7 @@ class RecurringPlan(models.Model):
     active = fields.Boolean()
     status = fields.Selection(
         string='Status',
-        selection=[('Offer Recieve', 'Offer Recieve'),('Offer Accepted', 'Offer Accepted'), ('Offer Rejected', 'Offer Rejected')])
+        selection=[('New','New'),('Offer Received', 'Offer Received'),('Offer Accepted', 'Offer Accepted'), 
+                   ('Sold', 'Sold'),('Canceled', 'Canceled')],default='New',copy=False)
 
 
