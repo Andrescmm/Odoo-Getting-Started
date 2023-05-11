@@ -24,17 +24,17 @@ class RecurringPlan(models.Model):
     date_availability = fields.Datetime(copy = False, default=lambda self: self._default_date_availability() )
     expected_price = fields.Float(Required = True)
     selling_price = fields.Float("Selling Price", readonly = True, copy = False)
-    bedrooms = fields.Integer(default = 2)
-    living_area = fields.Integer()
+    bedrooms = fields.Integer(default=2)
+    living_area = fields.Integer(string="Living Area (sqm)")
     facades = fields.Integer()
     garage = fields.Boolean()
     garden = fields.Boolean()
-    garden_area = fields.Integer()
+    garden_area = fields.Integer(string="Garden Area (sqm)")
     garden_orientation = fields.Selection(
         string='Garden_Orientation',
         selection=[('north', 'North'), ('south', 'South'),('east', 'East'),('west', 'West')])
     active = fields.Boolean()
-    status = fields.Selection(
+    state = fields.Selection(
         string='Status',
         selection=[('New','New'),('Offer Received', 'Offer Received'),('Offer Accepted', 'Offer Accepted'), 
                    ('Sold', 'Sold'),('Canceled', 'Canceled')],default='New',copy=False)
