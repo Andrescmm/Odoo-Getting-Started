@@ -1,0 +1,17 @@
+
+<odoo>
+  <!-- Top menu item -->
+    <menuitem id="estate_menu_root" name="Real Estate">
+        <menuitem id="estate_advertisement_menu" name="Advertisements" sequence="5">
+            <menuitem id="menu_state" name="Real state" action="state_action_window"/>
+        </menuitem>
+    </menuitem>
+
+</odoo>
+
+
+
+
+<!-- <odoo>
+  <menuitem id="menu_state" name="Real Estate" action="state_action_window"/>
+</odoo> -->
