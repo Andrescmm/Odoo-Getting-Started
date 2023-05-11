@@ -14,8 +14,7 @@ class RecurringPlan(models.Model):
     # Functions
 
 
-    def _default_date_availability(self):
-        return fields.Date.context_today(self) + relativedelta(months=3)
+
 
 
     name = fields.Char(required = True)
