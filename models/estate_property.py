@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 
-from odoo import fields, models
+from odoo import api, fields, models
 from dateutil.relativedelta import relativedelta
 
 class EstateProperty(models.Model):
@@ -66,3 +66,36 @@ class EstateProperty(models.Model):
     offer_ids = fields.One2many("estate.property.offer", "property_id", string="Offers")
 
 
+    # Computed
+
+    total_area = fields.Integer(
+        "Total Area (sqm)",
+        compute="_compute_total_area",
+        help="Total area computed by summing the living area and the garden area",
+    )
+
+    best_price = fields.Float("Best Offer", compute="_compute_best_price", help="Best offer received")
+
+
+    # Computed Methods
+    @api.depends("living_area", "garden_area")
+    def _compute_total_area(self):
+        for prop in self:
+            prop.total_area = prop.living_area + prop.garden_area
+
+
+    @api.depends("offer_ids.price")
+    def _compute_best_price(self):
+        for prop in self:
+            prop.best_price = max(prop.offer_ids.mapped("price")) if prop.offer_ids else 0.0
+
+
+    # On Change
+    @api.onchange("garden")
+    def _onchange_garden(self):
+        if self.garden:
+            self.garden_area = 10
+            self.garden_orientation = "north"
+        else:
+            self.garden_area = 0
+            self.garden_orientation = False        
