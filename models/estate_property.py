@@ -5,7 +5,7 @@
 from odoo import fields, models
 from dateutil.relativedelta import relativedelta
 
-class RecurringPlan(models.Model):
+class EstateProperty(models.Model):
     # Names
     _name = "estate.property"
     _description = "Estate Property"
@@ -34,9 +34,35 @@ class RecurringPlan(models.Model):
         string='Garden_Orientation',
         selection=[('north', 'North'), ('south', 'South'),('east', 'East'),('west', 'West')])
     active = fields.Boolean()
+
     state = fields.Selection(
-        string='Status',
-        selection=[('New','New'),('Offer Received', 'Offer Received'),('Offer Accepted', 'Offer Accepted'), 
-                   ('Sold', 'Sold'),('Canceled', 'Canceled')],default='New',copy=False)
+        selection=[
+            ("new", "New"),
+            ("offer_received", "Offer Received"),
+            ("offer_accepted", "Offer Accepted"),
+            ("sold", "Sold"),
+            ("canceled", "Canceled"),
+        ],
+        string="Status",
+        required=True,
+        copy=False,
+        default="new",
+    )
+
+
+    # Relational
+    property_type_id = fields.Many2one("estate.property.type", string="Property Type")
+
+    ## De muchos a uno
+    # User can be an employee
+    user_id = fields.Many2one("res.users", string="Salesman", default=lambda self: self.env.user)
+    # Buyer can be anyone
+    buyer_id = fields.Many2one("res.partner", string="Buyer", readonly=True, copy=False)
+
+    ## De muchos a muchos
+    tag_ids = fields.Many2many("estate.property.tag", string="Property Tag")
+
+    #De uno a muchos 
+    offer_ids = fields.One2many("estate.property.offer", "property_id", string="Offers")
 
 

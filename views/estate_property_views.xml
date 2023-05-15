@@ -22,6 +22,7 @@
                 <field name="expected_price"/>
                 <field name="selling_price"/>
                 <field name="date_availability"/>
+                <field name="state" invisible="1"/>
             </tree>
         </field>
  </record>
@@ -34,14 +35,21 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+
+                    <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>
                         </h1>
+                        <field name="tag_ids" widget="many2many_tags"/>
                     </div>
+
                     <group>
                         <group>
+                            <field name="property_type_id" />
                             <field name="postcode"/>
                             <field name="date_availability"/>
                         </group>
@@ -52,6 +60,7 @@
                     </group>
                     <notebook>
                         <page string="Description">
+                            <group>
                                 <group>
                                     <field name="description"/>
                                     <field name="bedrooms"/>
@@ -62,6 +71,19 @@
                                     <field name="garden_area" attrs="{'invisible': [('garden', '=', False)]}"/>
                                     <field name="garden_orientation" attrs="{'invisible': [('garden', '=', False)]}"/>
                                 </group>
+                            </group>
+                        </page>
+                        <page string="Offers">
+                            <field name="offer_ids"/>
+                             <!-- attrs="{'readonly': [('state', 'in', ('offer_accepted', 'sold', 'canceled'))]}" -->
+                        </page>
+                        <page string="Other Info">
+                            <group>
+                                <group>
+                                    <field name="user_id"/>
+                                    <field name="buyer_id"/>
+                                </group>
+                            </group>
                         </page>
                     </notebook>
                 </sheet>
