@@ -4,6 +4,8 @@
 
 from odoo import api, fields, models
 from dateutil.relativedelta import relativedelta
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools import float_compare, float_is_zero
 
 class EstateProperty(models.Model):
     # Names
@@ -33,7 +35,7 @@ class EstateProperty(models.Model):
     garden_orientation = fields.Selection(
         string='Garden_Orientation',
         selection=[('north', 'North'), ('south', 'South'),('east', 'East'),('west', 'West')])
-    active = fields.Boolean()
+    active = fields.Boolean("Active", default=True)
 
     state = fields.Selection(
         selection=[
@@ -99,3 +101,16 @@ class EstateProperty(models.Model):
         else:
             self.garden_area = 0
             self.garden_orientation = False        
+
+
+   # Action Methods 
+
+    def action_sold(self):
+        if "canceled" in self.mapped("state"):
+            raise UserError("Canceled properties cannot be sold.")
+        return self.write({"state": "sold"})
+
+    def action_cancel(self):
+        if "sold" in self.mapped("state"):
+            raise UserError("Sold properties cannot be canceled.")
+        return self.write({"state": "canceled"})
