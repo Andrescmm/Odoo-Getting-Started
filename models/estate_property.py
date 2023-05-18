@@ -1,21 +1,26 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
-from dateutil.relativedelta import relativedelta
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare, float_is_zero
+
 
 class EstateProperty(models.Model):
     # Names
     _name = "estate.property"
     _description = "Estate Property"
+    _order = "name"
+     #SQL Constrains
+
+    _sql_constraints = [
+        ("check_expected_price", "CHECK(expected_price > 0)", "The expected price must be strictly positive"),
+        ("check_selling_price", "CHECK(selling_price >= 0)", "The offer price must be positive"),
+    ]
 
 
     # Functions
-
-
     def _default_date_availability(self):
         return fields.Date.context_today(self) + relativedelta(months=3)
 
@@ -35,7 +40,7 @@ class EstateProperty(models.Model):
     garden_orientation = fields.Selection(
         string='Garden_Orientation',
         selection=[('north', 'North'), ('south', 'South'),('east', 'East'),('west', 'West')])
-    active = fields.Boolean("Active", default=True)
+    
 
     state = fields.Selection(
         selection=[
@@ -51,6 +56,7 @@ class EstateProperty(models.Model):
         default="new",
     )
 
+    active = fields.Boolean("Active", default=True)
 
     # Relational
     property_type_id = fields.Many2one("estate.property.type", string="Property Type")
@@ -114,3 +120,17 @@ class EstateProperty(models.Model):
         if "sold" in self.mapped("state"):
             raise UserError("Sold properties cannot be canceled.")
         return self.write({"state": "canceled"})
+
+
+   # Constrains
+    @api.constrains("expected_price", "selling_price")
+    def _check_price_difference(self):
+        for prop in self:
+            if (
+                not float_is_zero(prop.selling_price, precision_rounding=0.01)
+                and float_compare(prop.selling_price, prop.expected_price * 90.0 / 100.0, precision_rounding=0.01) < 0
+            ):
+                raise ValidationError(
+                    "The selling price must be at least 90% of the expected price! "
+                    + "You must reduce the expected price if you want to accept this offer."
+                )     
