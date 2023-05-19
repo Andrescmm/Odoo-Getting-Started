@@ -11,7 +11,7 @@ class EstateProperty(models.Model):
     # Names
     _name = "estate.property"
     _description = "Estate Property"
-    _order = "name"
+    _order = "id desc"
      #SQL Constrains
 
     _sql_constraints = [
@@ -25,18 +25,18 @@ class EstateProperty(models.Model):
         return fields.Date.context_today(self) + relativedelta(months=3)
 
 
-    name = fields.Char(required = True)
-    description = fields.Text()
-    postcode = fields.Char()
-    date_availability = fields.Datetime(copy = False, default=lambda self: self._default_date_availability() )
-    expected_price = fields.Float(Required = True)
-    selling_price = fields.Float("Selling Price", readonly = True, copy = False)
-    bedrooms = fields.Integer(default=2)
-    living_area = fields.Integer(string="Living Area (sqm)")
-    facades = fields.Integer()
-    garage = fields.Boolean()
-    garden = fields.Boolean()
-    garden_area = fields.Integer(string="Garden Area (sqm)")
+    name = fields.Char("Title", required=True)
+    description = fields.Text("Description")
+    postcode = fields.Char("Postcode")
+    date_availability = fields.Date("Available From", default=lambda self: self._default_date_availability(), copy=False)
+    expected_price = fields.Float("Expected Price", required=True)
+    selling_price = fields.Float("Selling Price", copy=False, readonly=True)
+    bedrooms = fields.Integer("Bedrooms", default=2)
+    living_area = fields.Integer("Living Area (sqm)")
+    facades = fields.Integer("Facades")
+    garage = fields.Boolean("Garage")
+    garden = fields.Boolean("Garden")
+    garden_area = fields.Integer("Garden Area (sqm)")
     garden_orientation = fields.Selection(
         string='Garden_Orientation',
         selection=[('north', 'North'), ('south', 'South'),('east', 'East'),('west', 'West')])
@@ -99,6 +99,20 @@ class EstateProperty(models.Model):
 
 
     # On Change
+
+    @api.constrains("expected_price", "selling_price")
+    def _check_price_difference(self):
+        for prop in self:
+            if (
+                not float_is_zero(prop.selling_price, precision_rounding=0.01)
+                and float_compare(prop.selling_price, prop.expected_price * 90.0 / 100.0, precision_rounding=0.01) < 0
+            ):
+                raise ValidationError(
+                    "The selling price must be at least 90% of the expected price! "
+                    + "You must reduce the expected price if you want to accept this offer."
+                )   
+            
+
     @api.onchange("garden")
     def _onchange_garden(self):
         if self.garden:
@@ -122,15 +136,5 @@ class EstateProperty(models.Model):
         return self.write({"state": "canceled"})
 
 
-   # Constrains
-    @api.constrains("expected_price", "selling_price")
-    def _check_price_difference(self):
-        for prop in self:
-            if (
-                not float_is_zero(prop.selling_price, precision_rounding=0.01)
-                and float_compare(prop.selling_price, prop.expected_price * 90.0 / 100.0, precision_rounding=0.01) < 0
-            ):
-                raise ValidationError(
-                    "The selling price must be at least 90% of the expected price! "
-                    + "You must reduce the expected price if you want to accept this offer."
-                )     
+
+      
