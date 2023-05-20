@@ -5,7 +5,11 @@
     'author': "Inka Labs",
     'website': "https://inka-labs.com/",
     'category': 'Sales/state',
-    # data files always loaded at installation
+    "depends": [
+        "base",
+        "web",
+    ],
+
     'data': [
      'security/ir.model.access.csv',
      'views/estate_property_offer_views.xml',
@@ -15,4 +19,5 @@
      'views/res_users_views.xml',
      'views/estate_menus.xml',
     ],
+    "application": True,
 }

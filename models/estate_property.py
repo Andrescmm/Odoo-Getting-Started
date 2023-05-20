@@ -137,7 +137,6 @@ class EstateProperty(models.Model):
 
 
     #Crud
-    
     def unlink(self):
         if not set(self.mapped("state")) <= {"new", "canceled"}:
             raise UserError("Only new and canceled properties can be deleted.")
